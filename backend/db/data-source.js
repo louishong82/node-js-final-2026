@@ -11,7 +11,7 @@ const dataSource = new DataSource({
   username: process.env.DB_USERNAME || 'student',
   password: process.env.DB_PASSWORD || 'student666',
   database: process.env.DB_DATABASE || 'fitness',
-  synchronize: false,
+  synchronize: process.env.DB_SYNCHRONIZE === 'teue',
   entities: [
     Skill,CreditPackage
   ],
