@@ -1,0 +1,42 @@
+const { EntitySchema } = require('typeorm')
+
+module.exports = new EntitySchema({
+    name:"Coach",
+    tableName:"COACH",
+    columns:{
+        id:{
+            primary:true,
+            type:"uuid",
+            generated:"uuid"
+        },
+        experience_years:{
+            type:"integer",
+            nullable:false
+        },
+        description:{
+            type:"text",
+            nullable:false
+        },
+        profile_image_url:{
+            type:"varchar",
+            length:500,
+            nullable:true
+        },
+        created_at:{
+            type:"timestamp",
+            createDate:true
+        },
+        updated_at:{
+            type:"timestamp",
+            updateDate:true
+        }
+    },
+    relations:{
+        user:{
+            target:"Users",
+            type:"one-to-one",
+            joinColumn:{name:"user_id"},
+            nullable:false
+        }
+    }
+})

@@ -3,6 +3,9 @@ const { DataSource } = require('typeorm')
 const Skill = require('../entities/Skill');
 const CreditPackage = require('../entities/CreditPackage');
 const Users = require('../entities/Users');
+const Coach = require('../entities/Coach');
+const CoachSkill = require('../entities/CoachSkill');
+const Course = require('../entities/Course');
 
 
 const dataSource = new DataSource({
@@ -14,7 +17,7 @@ const dataSource = new DataSource({
   database: process.env.DB_DATABASE || 'fitness',
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
   entities: [
-    Skill,CreditPackage,Users
+    Skill,CreditPackage,Users,Coach,CoachSkill,Course
   ],
   migrations: ['db/migrations/*.js'],
 })
