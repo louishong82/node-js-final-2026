@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "bin": {
+    "backend": "bin/server.js"
+  },
+  "dependencies": {
+      "cors": "^2.8.6",
+      "dotenv": "^17.4.2",
+      "express": "^5.2.1",
+      "pg": "^8.23.0",
+      "typeorm": "^0.3.20"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./bin/server.js",
+    "start": "node ./bin/server.js",
+    "migration:generate": "typeorm migration:generate -d ./db/data-source.js -o",
+    "migration:run": "typeorm migration:run -d ./db/data-source.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
