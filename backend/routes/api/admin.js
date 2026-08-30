@@ -265,6 +265,63 @@ router.post('/:userId',async (req,res)=>{
     }catch(err){
         return res.status(400).json({ status: 'failed', message: err.message })
     }
-})
+});
+
+router.get('/revenue', authMiddleware, checkCoach, async (req, res) => {
+    try {
+        const monthNames = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+        const monthIndex = monthNames.indexOf(req.query.month);
+        if (!req.query.month || monthIndex === -1) {
+            return res.status(400).json({ status: 'failed', message: '欄位未填寫正確' });
+        }
+
+        const year = new Date().getFullYear();
+        const start = new Date(year, monthIndex, 1);
+        const end = new Date(year, monthIndex + 1, 1);
+
+        const courses = await dataSource.getRepository('Course').find({
+            where: { user: { id: req.user.id } }
+        });
+        const courseIds = courses.map(c => c.id);
+
+        if (courseIds.length === 0) {
+            return res.status(200).json({
+                status: 'success',
+                data: { total: { revenue: 0, participants: 0, course_count: 0 } }
+            });
+        }
+
+        const { In, Between, IsNull } = require('typeorm');
+        const bookings = await dataSource.getRepository('CourseBooking').find({
+            where: {
+                course: { id: In(courseIds) },
+                cancelled_at: IsNull(),
+                booked_at: Between(start, end)
+            },
+            relations: ['user']
+        });
+
+        const courseCount = bookings.length;
+        const participantIds = new Set(bookings.map(b => b.user.id));
+        const packages = await dataSource.getRepository('CreditPackage').find();
+        const totalPrice = packages.reduce((sum, p) => sum + p.price, 0);
+        const totalCredits = packages.reduce((sum, p) => sum + p.credit_amount, 0);
+        const perCreditPrice = totalCredits > 0 ? totalPrice / totalCredits : 0;
+        const revenue = Math.floor(courseCount * perCreditPrice);
+
+        return res.status(200).json({
+            status: 'success',
+            data: {
+                total: {
+                    revenue,
+                    participants: participantIds.size,
+                    course_count: courseCount
+                }
+            }
+        });
+    } catch (err) {
+        return res.status(400).json({ status: 'failed', message: err.message });
+    }
+});
 
 module.exports = router
