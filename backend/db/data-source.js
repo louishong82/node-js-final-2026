@@ -6,7 +6,8 @@ const Users = require('../entities/Users');
 const Coach = require('../entities/Coach');
 const CoachSkill = require('../entities/CoachSkill');
 const Course = require('../entities/Course');
-
+const CreditPackagePurchase = require('../entities/CreditPackagePurchase');
+const CourseBooking = require('../entities/CourseBooking');
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -17,7 +18,7 @@ const dataSource = new DataSource({
   database: process.env.DB_DATABASE || 'fitness',
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
   entities: [
-    Skill,CreditPackage,Users,Coach,CoachSkill,Course
+    Skill,CreditPackage,Users,Coach,CoachSkill,Course,CreditPackagePurchase,CourseBooking
   ],
   migrations: ['db/migrations/*.js'],
 })

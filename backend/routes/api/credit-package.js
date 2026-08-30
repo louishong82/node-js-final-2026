@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {dataSource} = require('../../db/data-source')
+const authMiddleware = require('../../middleware/auth');
 
 router.get('/',async(req,res)=>{
     const creditPackage = await dataSource.getRepository('CreditPackage').find()
@@ -52,6 +53,25 @@ router.post('/',async(req,res)=>{
         return res.status(400).json({ status: 'failed', message: err.message })
     }
 })
+router.post('/:id', authMiddleware, async (req, res) => {
+    try {
+        const pkg = await dataSource.getRepository('CreditPackage').findOneBy({ id: req.params.id });
+        if (!pkg) {
+            return res.status(400).json({ status: 'failed', message: 'ID錯誤' });
+        }
+
+        await dataSource.getRepository('CreditPackagePurchase').save({
+            purchased_credits: pkg.credit_amount,
+            price_paid: pkg.price,
+            user: { id: req.user.id },
+            creditPackage: { id: pkg.id }
+        });
+
+        return res.status(200).json({ status: 'success', data: null });
+    } catch (err) {
+        return res.status(400).json({ status: 'failed', message: err.message });
+    }
+});
 
 router.delete('/:id',async(req,res)=>{
     try{

@@ -134,4 +134,64 @@ router.put('/password',authMiddleware,async(req,res)=>{
         res.status(200).json({ status: 'success',"data": null });
 })
 
+router.get('/credit-package', authMiddleware, async (req, res) => {
+    try {
+        const purchases = await dataSource.getRepository('CreditPackagePurchase').find({
+            where: { user: { id: req.user.id } },
+            relations: ['creditPackage'],
+            order: { purchase_at: 'DESC' }
+        });
+
+        const data = purchases.map(p => ({
+            name: p.creditPackage.name,
+            purchased_credits: p.purchased_credits,
+            price_paid: p.price_paid,
+            purchase_at: p.purchase_at
+        }));
+
+        return res.status(200).json({ status: 'success', data });
+    } catch (err) {
+        return res.status(400).json({ status: 'failed', message: err.message });
+    }
+});
+
+router.get('/courses', authMiddleware, async (req, res) => {
+    try {
+        const purchases = await dataSource.getRepository('CreditPackagePurchase').find({
+            where: { user: { id: req.user.id } }
+        });
+        const totalCredits = purchases.reduce((sum, p) => sum + p.purchased_credits, 0);
+
+        const bookings = await dataSource.getRepository('CourseBooking').find({
+            where: { user: { id: req.user.id } },
+            relations: ['course', 'course.user']
+        });
+
+        const activeCount = bookings.filter(b => b.cancelled_at === null).length;
+
+        const courseBooking = bookings
+            .map(b => ({
+                course_id: b.course.id,
+                name: b.course.name,
+                start_at: b.course.start_at,
+                end_at: b.course.end_at,
+                meeting_url: b.course.meeting_url,
+                coach_name: b.course.user.name,
+                cancelled_at: b.cancelled_at
+            }))
+            .sort((a, b) => new Date(a.start_at) - new Date(b.start_at));
+
+        return res.status(200).json({
+            status: 'success',
+            data: {
+                credit_remain: totalCredits - activeCount,
+                credit_usage: activeCount,
+                course_booking: courseBooking
+            }
+        });
+    } catch (err) {
+        return res.status(400).json({ status: 'failed', message: err.message });
+    }
+});
+
 module.exports = router
