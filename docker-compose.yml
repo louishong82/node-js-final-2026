@@ -52,22 +52,30 @@ services:
   #   - 要有 healthcheck（打你的 GET /healthcheck）
   #   - depends_on postgres 的 healthy
   # ============================================================
-  # backend:
-  #   build:
-  #     context: ____
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "____:____"
-  #   environment:     # 需要哪些變數？可根據 .env.example 對照補齊
-  #     - PORT=____
-  #     - DB_HOST=____
-  #     # …其餘 DB_ 連線資訊與 JWT 設定自行補上
-  #   depends_on:
-  #     postgres:
-  #       condition: ____
-  #   healthcheck:
-  #     # 把網址補成你的 PORT 與 /healthcheck 路徑
-  #     test: ["CMD-SHELL", "node -e \"fetch('http://localhost:____/____').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
-  #     interval: 10s
-  #     timeout: 3s
-  #     retries: 5
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:     # 需要哪些變數？可根據 .env.example 對照補齊
+      - PORT=8080
+      - DB_HOST=postgres
+      - JWT_SECRET=adsd14fefqq
+      - DB_PORT=5432
+      - DB_USERNAME=student
+      - DB_PASSWORD=student666
+      - DB_DATABASE=fitness
+      - DB_SYNCHRONIZE=true
+      - DB_ENABLE_SSL=false
+      - JWT_EXPIRES_DAY=30d
+      # …其餘 DB_ 連線資訊與 JWT 設定自行補上
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # 把網址補成你的 PORT 與 /healthcheck 路徑
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:8080/healthcheck').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 10s
+      timeout: 3s
+      retries: 5
